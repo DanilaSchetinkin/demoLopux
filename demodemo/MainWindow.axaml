@@ -1,0 +1,73 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:demodemo"
+		x:CompileBindings="False"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="600"
+        x:Class="demodemo.MainWindow"
+        Title="Продукция">
+  
+    <Grid RowDefinitions="Auto, *, Auto" ColumnDefinitions="*" Margin="10">
+       
+        
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+            
+            <TextBox x:Name="SearchBox" Width="200" Watermark="Поиск..."/>
+            
+            <ComboBox x:Name="SortComboBox" Width="220"/>
+            
+            <ComboBox x:Name="FilterComboBox" Width="170"/>
+
+        </StackPanel>
+       
+        
+        <ListBox x:Name="ProductList" Grid.Row="1">
+			<ListBox.ItemTemplate>
+				<DataTemplate>
+					<Border Margin="7" Padding="15" BorderThickness="1" BorderBrush="Black">
+						<Grid ColumnDefinitions="Auto, *">
+    
+                            <Image Grid.Column="0" 
+                                   Source="{Binding ImagePath}" 
+                                   Width="120" 
+                                   Height="120"
+                                   Margin="0,0,15,0"/>
+
+                            <Grid Grid.Column="1" VerticalAlignment="Center">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                    <RowDefinition Height="Auto"/>
+                                </Grid.RowDefinitions>
+                                
+                                <Grid Grid.Row="0" ColumnDefinitions="*, Auto">
+                                    <StackPanel Grid.Column="0" Orientation="Horizontal">
+                                        <TextBlock Text="{Binding Title}" FontSize="20" FontWeight="Bold"/>
+                                        <TextBlock Text=" | " FontSize="20"/>
+                                        <TextBlock Text="{Binding ProductType.Title}" FontSize="20"/>
+                                    </StackPanel>
+
+                                    <TextBlock Grid.Column="1" Text="{Binding MinCostForAgent, StringFormat='{}{0:C}'}" 
+                                               FontSize="20" FontWeight="Bold" HorizontalAlignment="Right"/>
+                                </Grid>
+                                
+                                <TextBlock Grid.Row="1" Text="{Binding ArticleNumber}" Foreground="Gray" Margin="0,5,0,0"/>
+                                
+                                <TextBlock Grid.Row="2" Text="{Binding ProductMaterials.MaterialId}" Margin="0,5,0,0"/>
+                            </Grid>
+    
+                        </Grid>
+					</Border>
+				</DataTemplate>
+			</ListBox.ItemTemplate>	
+		</ListBox>
+
+       
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
+            <Button Name="PrevButton" Content="&lt; Пред." Click="PrevButton_Click"/>
+            <StackPanel Name="PageNumbersPanel" Orientation="Horizontal" Spacing="5"/>
+            <Button Name="NextButton" Content="След. &gt;" Click="NextButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
