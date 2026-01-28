@@ -1,0 +1,71 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="700"
+        x:Class="demodemo.ProductEditWindow"
+        x:CompileBindings="False"
+        Title="Add/Edit Product"
+        WindowStartupLocation="CenterOwner"
+        Width="800" Height="700">
+    <Grid Margin="15" RowDefinitions="Auto, *, Auto">
+        <!-- Main fields -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto, *, Auto" RowDefinitions="Auto, Auto, Auto, Auto, Auto, Auto, Auto" Margin="0,0,0,15">
+            <TextBlock Grid.Row="0" Grid.Column="0" VerticalAlignment="Center">Article:</TextBlock>
+            <TextBox Name="ArticleTextBox" Grid.Row="0" Grid.Column="1" Margin="10,0"/>
+
+            <TextBlock Grid.Row="1" Grid.Column="0" VerticalAlignment="Center">Title:</TextBlock>
+            <TextBox Name="TitleTextBox" Grid.Row="1" Grid.Column="1" Margin="10,0"/>
+
+            <TextBlock Grid.Row="2" Grid.Column="0" VerticalAlignment="Center">Product Type:</TextBlock>
+            <ComboBox Name="ProductTypeComboBox" Grid.Row="2" Grid.Column="1" Margin="10,0"/>
+
+            <TextBlock Grid.Row="3" Grid.Column="0" VerticalAlignment="Center">Person Count:</TextBlock>
+            <TextBox Name="PersonCountTextBox" Grid.Row="3" Grid.Column="1" Margin="10,0"/>
+            
+            <TextBlock Grid.Row="4" Grid.Column="0" VerticalAlignment="Center">Workshop Number:</TextBlock>
+            <TextBox Name="WorkshopNumberTextBox" Grid.Row="4" Grid.Column="1" Margin="10,0"/>
+
+            <TextBlock Grid.Row="5" Grid.Column="0" VerticalAlignment="Center">Min. Cost:</TextBlock>
+            <TextBox Name="MinCostTextBox" Grid.Row="5" Grid.Column="1" Margin="10,0"/>
+
+            <!-- Image -->
+            <StackPanel Grid.Row="0" Grid.Column="2" Grid.RowSpan="5" HorizontalAlignment="Center" Spacing="10">
+                <Image Name="ProductImage" Width="150" Height="150"/>
+                <Button Name="ChangeImageButton" Content="Change Image" Click="ChangeImageButton_Click"/>
+            </StackPanel>
+
+            <TextBlock Grid.Row="6" Grid.Column="0" VerticalAlignment="Top">Description:</TextBlock>
+            <TextBox Name="DescriptionTextBox" Grid.Row="6" Grid.Column="1" Grid.ColumnSpan="2" Height="80" TextWrapping="Wrap" AcceptsReturn="True" Margin="10,0"/>
+        </Grid>
+
+        <!-- Materials -->
+        <Grid Grid.Row="1" RowDefinitions="Auto, *">
+            <TextBlock Grid.Row="0" FontSize="16" FontWeight="Bold">Materials</TextBlock>
+            <ListBox Name="MaterialsListBox" Grid.Row="1" Margin="0,10,0,0">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <Grid ColumnDefinitions="*, Auto, Auto">
+                            <TextBlock Grid.Column="0" Text="{Binding Material.Title}" VerticalAlignment="Center"/>
+                            <TextBlock Grid.Column="1" Text="{Binding Count}" VerticalAlignment="Center" Margin="10,0"/>
+                            <Button Grid.Column="2" Content="Delete" Tag="{Binding}" Click="DeleteMaterialButton_Click"/>
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
+        
+        <!-- Add Materials -->
+        <StackPanel Grid.Row="1" VerticalAlignment="Bottom" Orientation="Horizontal" Spacing="10">
+            <ComboBox Name="AddMaterialComboBox" Width="250"/>
+            <TextBox Name="AddMaterialCountTextBox" Width="100"/>
+            <Button Name="AddMaterialButton" Content="Add Material" Click="AddMaterialButton_Click"/>
+        </StackPanel>
+
+        <!-- Control Buttons -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Spacing="10">
+            <Button Name="SaveButton" Content="Save" Click="SaveButton_Click"/>
+            <Button Name="DeleteButton" Content="Delete" IsVisible="False" Background="Red" Foreground="White" Click="DeleteButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>

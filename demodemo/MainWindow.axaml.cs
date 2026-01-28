@@ -1,15 +1,15 @@
 using Avalonia.Controls;
-using Avalonia.Data; 
+using Avalonia.Data;
 using Avalonia.Interactivity;
 using demodemo.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace demodemo
 {
-    
     public enum SortCriteria
     {
         Default, TitleAsc, TitleDesc, WorkshopAsc, WorkshopDesc, CostAsc, CostDesc
@@ -27,47 +27,64 @@ namespace demodemo
         private const int PageSize = 20;
         private int _totalPages;
 
-       
-        private List<SortItem> _sortItems = new List<SortItem>
+        private readonly List<SortItem> _sortItems = new List<SortItem>
         {
-            new SortItem { Name = "Без сортировки", Value = SortCriteria.Default },
+            new SortItem { Name = "По умолчанию", Value = SortCriteria.Default },
             new SortItem { Name = "Наименование (по возрастанию)", Value = SortCriteria.TitleAsc },
             new SortItem { Name = "Наименование (по убыванию)", Value = SortCriteria.TitleDesc },
             new SortItem { Name = "Номер цеха (по возрастанию)", Value = SortCriteria.WorkshopAsc },
             new SortItem { Name = "Номер цеха (по убыванию)", Value = SortCriteria.WorkshopDesc },
-            new SortItem { Name = "Мин. стоимость (по возрастанию)", Value = SortCriteria.CostAsc },
-            new SortItem { Name = "Мин. стоимость (по убыванию)", Value = SortCriteria.CostDesc }
+            new SortItem { Name = "Стоимость (по возрастанию)", Value = SortCriteria.CostAsc },
+            new SortItem { Name = "Стоимость (по убыванию)", Value = SortCriteria.CostDesc }
         };
 
         public MainWindow()
         {
             InitializeComponent();
+            // Метод OnLoaded вызовется автоматически, когда окно будет готово
+        }
 
-            
+        // Переименовали InitializeControls в OnLoaded, чтобы следовать стандартным практикам Avalonia
+        protected override async void OnLoaded(RoutedEventArgs e)
+        {
+            base.OnLoaded(e);
+
             SearchBox.TextChanged += OnFilterOrSortChanged;
 
             SortComboBox.ItemsSource = _sortItems;
             SortComboBox.DisplayMemberBinding = new Binding("Name");
-            SortComboBox.SelectedIndex = 0; 
+            SortComboBox.SelectedIndex = 0;
             SortComboBox.SelectionChanged += OnFilterOrSortChanged;
 
-            
-            LoadProducts();
-        }
-
-        
-        public void LoadProducts()
-        {
             using (var context = new LopuxDbContext())
             {
-                
+                var allTypesItem = new ProductType { Id = 0, Title = "Все типы" };
+                var productTypes = new List<ProductType> { allTypesItem };
+                productTypes.AddRange(await context.ProductTypes.OrderBy(pt => pt.Title).ToListAsync());
+
+                FilterComboBox.ItemsSource = productTypes;
+                FilterComboBox.DisplayMemberBinding = new Binding("Title");
+                FilterComboBox.SelectedIndex = 0;
+            }
+            FilterComboBox.SelectionChanged += OnFilterOrSortChanged;
+
+            await LoadProductsAsync();
+        }
+
+        public async Task LoadProductsAsync()
+        {
+            await using (var context = new LopuxDbContext())
+            {
                 string? searchText = SearchBox.Text;
                 var sortCriteria = (SortComboBox.SelectedItem as SortItem)?.Value ?? SortCriteria.Default;
-                var query = context.Products
-                                   .Include(p => p.ProductType)
-                                   .AsQueryable();
+                var selectedProductType = FilterComboBox.SelectedItem as ProductType;
 
-               
+                var query = context.Products
+                    .Include(p => p.ProductType)
+                    .Include(p => p.ProductMaterials)
+                    .ThenInclude(pm => pm.Material)
+                    .AsQueryable();
+
                 if (!string.IsNullOrWhiteSpace(searchText))
                 {
                     string lowercasedSearchText = searchText.ToLower();
@@ -77,56 +94,69 @@ namespace demodemo
                     );
                 }
 
-                
-                switch (sortCriteria)
+                if (selectedProductType != null && selectedProductType.Id != 0)
                 {
-                    case SortCriteria.TitleAsc:
-                        query = query.OrderBy(p => p.Title);
-                        break;
-                    case SortCriteria.TitleDesc:
-                        query = query.OrderByDescending(p => p.Title);
-                        break;
-                    case SortCriteria.WorkshopAsc:
-                        query = query.OrderBy(p => p.ProductionWorkshopNumber);
-                        break;
-                    case SortCriteria.WorkshopDesc:
-                        query = query.OrderByDescending(p => p.ProductionWorkshopNumber);
-                        break;
-                    case SortCriteria.CostAsc:
-                        query = query.OrderBy(p => p.MinCostForAgent);
-                        break;
-                    case SortCriteria.CostDesc:
-                        query = query.OrderByDescending(p => p.MinCostForAgent);
-                        break;
-                    default: 
-                        query = query.OrderBy(p => p.Id);
-                        break;
+                    query = query.Where(p => p.ProductTypeId == selectedProductType.Id);
                 }
 
-               
-                var totalItems = query.Count();
+                // --- ГЛАВНОЕ ИСПРАВЛЕНИЕ ЗДЕСЬ ---
+                // Добавили обработку NULL-значений, чтобы избежать вылета
+                query = sortCriteria switch
+                {
+                    SortCriteria.TitleAsc => query.OrderBy(p => p.Title ?? ""),
+                    SortCriteria.TitleDesc => query.OrderByDescending(p => p.Title ?? ""),
+                    SortCriteria.WorkshopAsc => query.OrderBy(p => p.ProductionWorkshopNumber ?? int.MaxValue),
+                    SortCriteria.WorkshopDesc => query.OrderByDescending(p => p.ProductionWorkshopNumber ?? int.MaxValue),
+                    SortCriteria.CostAsc => query.OrderBy(p => p.MinCostForAgent), // Стоимость обычно не бывает null
+                    SortCriteria.CostDesc => query.OrderByDescending(p => p.MinCostForAgent),
+                    _ => query.OrderBy(p => p.Id),
+                };
+
+                var totalItems = await query.CountAsync();
                 _totalPages = (int)Math.Ceiling(totalItems / (double)PageSize);
                 if (_totalPages == 0) _totalPages = 1;
                 if (_currentPage > _totalPages) _currentPage = _totalPages;
 
-                var pagedProducts = query
+                var pagedProducts = await query
                     .Skip((_currentPage - 1) * PageSize)
                     .Take(PageSize)
-                    .ToList();
+                    .ToListAsync();
 
-                
                 ProductList.ItemsSource = pagedProducts;
                 GeneratePageNumbers();
                 UpdatePageButtons();
             }
         }
 
-        
-        private void OnFilterOrSortChanged(object? sender, EventArgs e)
+        private async void OnFilterOrSortChanged(object? sender, EventArgs e)
         {
-          
             _currentPage = 1;
-            LoadProducts();
+            await LoadProductsAsync();
+        }
+
+        private async void AddProductButton_Click(object? sender, RoutedEventArgs e)
+        {
+            var editWindow = new ProductEditWindow();
+            var result = await editWindow.ShowDialog<bool>(this);
+
+            if (result)
+            {
+                await LoadProductsAsync();
+            }
+        }
+
+        private async void ProductList_DoubleTapped(object? sender, RoutedEventArgs e)
+        {
+            if (ProductList.SelectedItem is Product selectedProduct)
+            {
+                var editWindow = new ProductEditWindow(selectedProduct);
+                var result = await editWindow.ShowDialog<bool>(this);
+
+                if (result)
+                {
+                    await LoadProductsAsync();
+                }
+            }
         }
 
         private void GeneratePageNumbers()
@@ -151,31 +181,30 @@ namespace demodemo
             NextButton.IsEnabled = _currentPage < _totalPages;
         }
 
-        // Обработчики пагинации теперь вызывают LoadProducts без параметров
-        private void PageNumber_Click(object? sender, RoutedEventArgs e)
+        private async void PageNumber_Click(object? sender, RoutedEventArgs e)
         {
             if (sender is Button button && button.Tag is int page)
             {
                 _currentPage = page;
-                LoadProducts();
+                await LoadProductsAsync();
             }
         }
 
-        private void PrevButton_Click(object? sender, RoutedEventArgs e)
+        private async void PrevButton_Click(object? sender, RoutedEventArgs e)
         {
             if (_currentPage > 1)
             {
                 _currentPage--;
-                LoadProducts();
+                await LoadProductsAsync();
             }
         }
 
-        private void NextButton_Click(object? sender, RoutedEventArgs e)
+        private async void NextButton_Click(object? sender, RoutedEventArgs e)
         {
             if (_currentPage < _totalPages)
             {
                 _currentPage++;
-                LoadProducts();
+                await LoadProductsAsync();
             }
         }
     }

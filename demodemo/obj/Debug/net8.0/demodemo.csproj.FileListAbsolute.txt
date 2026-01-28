@@ -294,3 +294,4 @@ C:\Users\HomePc\source\repos\demodemo\demodemo\obj\Debug\net8.0\refint\Avalonia\
 C:\Users\HomePc\source\repos\demodemo\demodemo\obj\Debug\net8.0\demodemo.csproj.Up2Date
 C:\Users\HomePc\source\repos\demodemo\demodemo\obj\Debug\net8.0\demodemo.genruntimeconfig.cache
 C:\Users\HomePc\source\repos\demodemo\demodemo\obj\Debug\net8.0\ref\demodemo.dll
+C:\Users\HomePc\source\repos\demodemo\demodemo\obj\Debug\net8.0\demodemo.sourcelink.json

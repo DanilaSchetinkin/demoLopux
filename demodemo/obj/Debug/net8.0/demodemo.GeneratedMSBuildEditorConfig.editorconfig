@@ -26,5 +26,11 @@ build_property.EnableCodeStyleSeverity =
 [C:/Users/HomePc/source/repos/demodemo/demodemo/App.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
+[C:/Users/HomePc/source/repos/demodemo/demodemo/CustomMessageBox.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
 [C:/Users/HomePc/source/repos/demodemo/demodemo/MainWindow.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/HomePc/source/repos/demodemo/demodemo/ProductEditWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml

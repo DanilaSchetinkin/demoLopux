@@ -11,18 +11,21 @@
     <Grid RowDefinitions="Auto, *, Auto" ColumnDefinitions="*" Margin="10">
        
         
-        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Center">
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Spacing="10" HorizontalAlignment="Stretch">
             
-            <TextBox x:Name="SearchBox" Width="200" Watermark="Поиск..."/>
-            
+            <TextBox x:Name="SearchBox" Width="200" Watermark="Search..."/>
             <ComboBox x:Name="SortComboBox" Width="220"/>
-            
             <ComboBox x:Name="FilterComboBox" Width="170"/>
 
+          
+            <Button Name="AddProductButton" 
+                    Content="Add Product" 
+                    HorizontalAlignment="Right" 
+                    Click="AddProductButton_Click"/>
         </StackPanel>
        
         
-        <ListBox x:Name="ProductList" Grid.Row="1">
+        <ListBox x:Name="ProductList" Grid.Row="1" DoubleTapped="ProductList_DoubleTapped">
 			<ListBox.ItemTemplate>
 				<DataTemplate>
 					<Border Margin="7" Padding="15" BorderThickness="1" BorderBrush="Black">
@@ -33,7 +36,6 @@
                                    Width="120" 
                                    Height="120"
                                    Margin="0,0,15,0"/>
-
                             <Grid Grid.Column="1" VerticalAlignment="Center">
                                 <Grid.RowDefinitions>
                                     <RowDefinition Height="Auto"/>
@@ -47,14 +49,14 @@
                                         <TextBlock Text=" | " FontSize="20"/>
                                         <TextBlock Text="{Binding ProductType.Title}" FontSize="20"/>
                                     </StackPanel>
-
                                     <TextBlock Grid.Column="1" Text="{Binding MinCostForAgent, StringFormat='{}{0:C}'}" 
                                                FontSize="20" FontWeight="Bold" HorizontalAlignment="Right"/>
                                 </Grid>
                                 
                                 <TextBlock Grid.Row="1" Text="{Binding ArticleNumber}" Foreground="Gray" Margin="0,5,0,0"/>
                                 
-                                <TextBlock Grid.Row="2" Text="{Binding ProductMaterials.MaterialId}" Margin="0,5,0,0"/>
+                              
+                                <TextBlock Grid.Row="2" Text="{Binding ProductMaterialsText}" Margin="0,5,0,0"/>
                             </Grid>
     
                         </Grid>
@@ -62,12 +64,12 @@
 				</DataTemplate>
 			</ListBox.ItemTemplate>	
 		</ListBox>
-
+       
        
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Center" Spacing="5">
-            <Button Name="PrevButton" Content="&lt; Пред." Click="PrevButton_Click"/>
+            <Button Name="PrevButton" Content="&lt; Prev" Click="PrevButton_Click"/>
             <StackPanel Name="PageNumbersPanel" Orientation="Horizontal" Spacing="5"/>
-            <Button Name="NextButton" Content="След. &gt;" Click="NextButton_Click"/>
+            <Button Name="NextButton" Content="Next &gt;" Click="NextButton_Click"/>
         </StackPanel>
     </Grid>
 </Window>
